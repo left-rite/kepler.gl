@@ -34,11 +34,15 @@ import {NestedPartial} from '@kepler.gl/types';
 
 type CustomPaletteProps = {
   customPalette: ColorRange;
+  isCustomDomain?: boolean;
+  colorDomain?: string[] | number[];
+  colorThresholds: number[];
   showSketcher?: boolean | number;
   setCustomPalette: (c: NestedPartial<ColorRange>) => void;
   onCancel: () => void;
   onToggleSketcher: (i: boolean | number) => void;
   onApply: (p: ColorRange, e: MouseEvent) => void;
+  setColorThresholds: (index, element) => void;
 };
 
 const dragHandleActive = css`
@@ -150,10 +154,43 @@ const DragHandle = SortableHandle(({className, children}) => (
   <StyledDragHandle className={className}>{children}</StyledDragHandle>
 ));
 
-class CustomPalette extends Component<CustomPaletteProps> {
-  state = {
-    isSorting: false
+type CustomPaletteState = {
+  isSorting: boolean;
+  // colorThresholds: string[] | number[];
+}
+
+class CustomPalette extends Component<CustomPaletteProps, CustomPaletteState> {
+  state: CustomPaletteState = {
+    isSorting: false,
+    // colorThresholds: this._init(),
   };
+
+  // _init() {
+  //   const {colorDomain} = this.props;
+  //   if (!colorDomain) {
+  //     return [];
+  //   }
+    
+  //   const length = this.props.customPalette.colors.length;
+  //   const min = typeof colorDomain[0] === "string" ? parseInt(colorDomain[0]) : colorDomain[0];
+  //   const max = typeof colorDomain[1] === "string" ? parseInt(colorDomain[1]) : colorDomain[1];
+
+  //   const getDecimalPlaces = (num: number) => {
+  //     if (Number.isInteger(num)) {
+  //       return 0;
+  //     }
+  //     return num.toString().split('.')[1].length;
+  //   };
+
+  //   const decimals = Math.max(getDecimalPlaces(min), getDecimalPlaces(max));
+
+  //   const roundDown = (num: number) => {
+  //     return decimals ? parseFloat(num.toFixed(decimals)) : parseInt(num.toFixed());
+  //   }
+
+  //   const increment = roundDown((max - min) / length);
+  //   return new Array(length).fill(undefined).map((v, i) => (i === length - 1) ? max : roundDown(min + increment * (i + 1))) as number[];
+  // }
 
   root = createRef<HTMLDivElement>();
 
@@ -222,6 +259,7 @@ class CustomPalette extends Component<CustomPaletteProps> {
 
   render() {
     const {colors} = this.props.customPalette;
+    const {colorDomain, isCustomDomain} = this.props;
 
     return (
       <div className="custom-palette-panel" ref={this.root}>
@@ -236,7 +274,8 @@ class CustomPalette extends Component<CustomPaletteProps> {
           helperClass="sorting-colors"
           useDragHandle
         >
-          {colors.map((color, index) => (
+          {colors.map((color, index) => {
+            return (
             <SortableItem key={index} index={index} isSorting={this.state.isSorting}>
               <DragHandle className="layer__drag-handle">
                 <VertDots height="20px" />
@@ -251,14 +290,41 @@ class CustomPalette extends Component<CustomPaletteProps> {
                     e.stopPropagation();
                   }}
                   onChange={e => this._inputColorHex(index, e)}
-                  id={`input-layer-label-${index}`}
+                  id={`color-hex-input-layer-label-${index}`}
                 />
               </StyledInlineInput>
+              {isCustomDomain && colorDomain && 
+                <StyledInlineInput>
+                  <InlineInput
+                    type="text"
+                    className="custom-palette-hex__lower-threshold"
+                    value={`${((index === 0) ? colorDomain[0] : this.props.colorThresholds[index-1])}`}
+                    id={`color-threshold-lower-${index}`}
+                    disabled
+                  />
+                </StyledInlineInput>
+              }
+              {isCustomDomain && colorDomain &&
+                <StyledInlineInput>
+                  <InlineInput
+                    type="text"
+                    className="custom-palette-hex__upper-threshold"
+                    value={(index === colors.length - 1) ? colorDomain[colorDomain.length-1] : this.props.colorThresholds[index]}
+                    onClick={e => {
+                      e.stopPropagation();
+                    }}
+                    onChange={e => this.props.setColorThresholds(index, e)}
+                    disabled={(index === colors.length - 1)}
+                    id={`color-threshold-input-${index}`}
+                  />
+                </StyledInlineInput>
+              }
               <StyledTrash onClick={() => this._onColorDelete(index)}>
                 <Trash className="trashbin" />
               </StyledTrash>
             </SortableItem>
-          ))}
+          )}
+          )}
         </WrappedSortableContainer>
         {/* Add Step Button */}
         <Button className="add-step__button" link onClick={this._onColorAdd}>
