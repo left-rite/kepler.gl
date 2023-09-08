@@ -46,7 +46,8 @@ import {
   UNKNOWN_COLOR_KEY,
   DEFAULT_HIGHLIGHT_COLOR,
   DEFAULT_LAYER_LABEL,
-  PROJECTED_PIXEL_SIZE_MULTIPLIER
+  PROJECTED_PIXEL_SIZE_MULTIPLIER,
+  ColorMap
 } from '@kepler.gl/constants';
 
 import {
@@ -889,18 +890,43 @@ class Layer {
 
   getColorScale(colorScale: string, colorDomain: VisualChannelDomain, colorRange: ColorRange) {
     if (Array.isArray(colorRange.colorMap)) {
-      const cMap = new Map();
-      colorRange.colorMap.forEach(([k, v]) => {
-        cMap.set(k, typeof v === 'string' ? hexToRgb(v) : v);
-      });
+      const {colorMap} = colorRange;
 
-      const scale = SCALE_FUNC[SCALE_TYPES.ordinal]()
-        .domain(cMap.keys())
-        .range(cMap.values())
-        .unknown(cMap.get(UNKNOWN_COLOR_KEY) || NO_VALUE_COLOR);
-      return scale;
+      const regex = /^\-?[0-9\.]+ to \-?[0-9\.]+$/;
+      const isCustomScale = c => typeof c[0] === 'string' && regex.test(c[0]);
+      return colorMap.every(isCustomScale) ? this.getCustomColorScale(colorMap) : this.getOrdinalColorScale(colorMap);
     }
     return this.getVisChannelScale(colorScale, colorDomain, colorRange.colors.map(hexToRgb));
+  }
+
+  getCustomColorScale(colorMap: ColorMap) {
+    const cMap = new Map();
+    const reformatKey = (k) => k.split(' to ')[1];
+   
+    colorMap.forEach(([k, v]) => {
+      cMap.set(reformatKey(k), typeof v === 'string' ? hexToRgb(v) : v);
+    });
+
+    const domain = Array.from(cMap.keys());
+    domain.pop();
+
+    return SCALE_FUNC[SCALE_TYPES.threshold]()
+      .domain(domain)
+      .range(cMap.values())
+      .unknown(cMap.get(UNKNOWN_COLOR_KEY) || NO_VALUE_COLOR);
+  }
+
+  getOrdinalColorScale(colorMap: ColorMap) {
+    const cMap = new Map();
+
+    colorMap.forEach(([k, v]) => {
+      cMap.set(k, typeof v === 'string' ? hexToRgb(v) : v);
+    });
+
+    return SCALE_FUNC[SCALE_TYPES.ordinal]()
+      .domain(cMap.keys())
+      .range(cMap.values())
+      .unknown(cMap.get(UNKNOWN_COLOR_KEY) || NO_VALUE_COLOR);
   }
 
   /**

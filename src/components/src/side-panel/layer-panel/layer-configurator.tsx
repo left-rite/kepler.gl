@@ -46,6 +46,7 @@ import {Layer, LayerBaseConfig, VisualChannel, AggregationLayer} from '@kepler.g
 import {NestedPartial, RGBColor, LayerVisConfig, ColorUI, Field} from '@kepler.gl/types';
 import {toggleModal, ActionHandler} from '@kepler.gl/actions';
 import {Datasets} from '@kepler.gl/table';
+import { LayerColorConfig } from 'layers/src/base-layer';
 
 type LayerConfiguratorProps = {
   layer: Layer;
@@ -86,10 +87,14 @@ type ArcLayerColorSelectorProps = {
 };
 
 type LayerColorRangeSelectorProps = {
-  layer: Layer;
+  layer: ColorLayer;
   onChange: (v: Record<string, ColorRange>) => void;
   property?: string;
   setColorUI: (prop: string, newConfig: NestedPartial<ColorUI>) => void;
+};
+
+class ColorLayer extends Layer {
+  config!: LayerBaseConfig & LayerColorConfig;
 };
 
 type ChannelByValueSelectorProps = {
@@ -1128,6 +1133,7 @@ export const LayerColorRangeSelector = ({
       ]}
       colorUI={layer.config.colorUI[property]}
       setColorUI={newConfig => setColorUI(property, newConfig)}
+      colorDomain={layer.config.colorDomain}
     />
   </SidePanelSection>
 );

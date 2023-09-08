@@ -36,6 +36,7 @@ import {NestedPartial, ColorUI} from '@kepler.gl/types';
 type ColorRangeSelectorProps = {
   colorPaletteUI: ColorUI;
   selectedColorRange: ColorRange;
+  colorDomain?: string[] | number[];
   onSelectColorRange: (p: ColorRange, e: MouseEvent) => void;
   setColorPaletteUI: (newConfig: NestedPartial<ColorUI>) => void;
 };
@@ -112,6 +113,50 @@ const CONFIG_SETTINGS = {
 };
 
 export default class ColorRangeSelector extends Component<ColorRangeSelectorProps> {
+
+  state = {
+    isCustomDomain: this.props.colorPaletteUI.customPalette.colorMap ? true : false,
+    colorThresholds: this.props.colorPaletteUI.customPalette.colorMap ? this._fromColorMap() : this._init(),
+  };
+
+  _fromColorMap() {
+    const {colorMap} = this.props.colorPaletteUI.customPalette;
+    const getEditableThreshold = (k) => (k && k.length > 0 && typeof k[0] === 'string') 
+      ? k[0].split(' to ').pop()
+      : null;
+    const thresholds = colorMap.map(getEditableThreshold);
+    thresholds.pop(); // The last one is not editable as it is the maxima
+    return thresholds;
+  }
+  
+  _init() {
+    const {colorDomain} = this.props;
+
+    if (!colorDomain) {
+      return [];
+    }
+    
+    const length = this.props.colorPaletteUI.colorRangeConfig.steps;
+    const min = typeof colorDomain[0] === "string" ? parseInt(colorDomain[0]) : colorDomain[0];
+    const max = typeof colorDomain[1] === "string" ? parseInt(colorDomain[1]) : colorDomain[1];
+
+    const getDecimalPlaces = (num: number) => {
+      if (Number.isInteger(num)) {
+        return 0;
+      }
+      return num.toString().split('.')[1].length;
+    };
+
+    const decimals = Math.max(getDecimalPlaces(min), getDecimalPlaces(max));
+
+    const roundDown = (num: number) => {
+      return decimals ? parseFloat(num.toFixed(decimals)) : parseInt(num.toFixed());
+    }
+
+    const increment = roundDown((max - min) / length);
+    return new Array(length).fill(undefined).map((v, i) => (i === length - 1) ? max : roundDown(min + increment * (i + 1))) as number[];
+  }
+
   static defaultProps = {
     onSelectColorRange: () => {},
     setColorPaletteUI: () => {}
@@ -142,6 +187,7 @@ export default class ColorRangeSelector extends Component<ColorRangeSelectorProp
     value: string | number | boolean | object | null;
   }) => {
     this._setColorRangeConfig({[key]: value});
+    // TODO: update colorMap with new thresholds
   };
 
   _onSetCustomPalette = (config: NestedPartial<ColorRange>) => {
@@ -169,11 +215,36 @@ export default class ColorRangeSelector extends Component<ColorRangeSelectorProp
     });
   };
 
+  _setColorThresholds(index, {target: {value}}) {
+    if (this.props.colorDomain) {
+      const colorThresholds = [...this.state.colorThresholds];
+      colorThresholds[index] = value;
+      this.setState({colorThresholds});
+
+      const {colorPaletteUI}= {...this.props}
+      const {colors} = colorPaletteUI.customPalette;
+      const minima = this.props.colorDomain[0];
+      const maxima = this.props.colorDomain[this.props.colorDomain.length - 1];
+      const isFirst = (i) => i === 0;
+      const isLast = (i, obj) => i === obj.length - 1;
+
+      const colorMap = colors.map((c, i, self) => {
+        const minOfRange = isFirst(i) ? minima : colorThresholds[i-1];
+        const maxOfRange = isLast(i, self) ? maxima : colorThresholds[i];
+        return [`${minOfRange} to ${maxOfRange}` , c];
+      });
+
+      colorPaletteUI.customPalette.colorMap = colorMap;
+
+      this.props.setColorPaletteUI(colorPaletteUI);
+    }
+  }
+
   render() {
+    const {isCustomDomain, colorThresholds} = this.state;
     const {customPalette, showSketcher, colorRangeConfig} = this.props.colorPaletteUI;
-
+    const {colorDomain} = this.props;
     const filteredColorRanges = this.filteredColorRange(this.props);
-
     return (
       <StyledColorRangeSelector>
         <StyledColorConfig>
@@ -186,16 +257,36 @@ export default class ColorRangeSelector extends Component<ColorRangeSelectorProp
               onChange={value => this._updateConfig({key, value})}
             />
           ))}
+          {colorRangeConfig.custom && (
+            <StyledPaletteConfig className="color-palette__config" onClick={e => e.stopPropagation()}>
+              <PanelLabel>
+                <FormattedMessage 
+                  id="custom-color-domain-label" 
+                  defaultMessage="Custom Domain"
+                />
+              </PanelLabel>
+              <Switch
+                id="custom-color-domain-switch"
+                checked={isCustomDomain}
+                onChange={() => this.setState({isCustomDomain: !isCustomDomain})}
+                secondary
+              />
+            </StyledPaletteConfig>
+          )}
         </StyledColorConfig>
 
         {colorRangeConfig.custom ? (
           <CustomPalette
             customPalette={customPalette}
+            isCustomDomain={isCustomDomain}
+            colorDomain={colorDomain}
+            colorThresholds={colorThresholds}
             showSketcher={showSketcher}
             onApply={this.props.onSelectColorRange}
             onToggleSketcher={this._onToggleSketcher}
             setCustomPalette={this._onSetCustomPalette}
             onCancel={this._onCustomPaletteCancel}
+            setColorThresholds={(i, e) => this._setColorThresholds(i, e)}
           />
         ) : (
           <ColorPaletteGroup

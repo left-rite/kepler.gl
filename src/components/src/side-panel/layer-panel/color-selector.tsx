@@ -28,6 +28,7 @@ import {StyledPanelDropdown} from '../../common/styled-components';
 import onClickOutside from 'react-onclickoutside';
 import {ColorRange} from '@kepler.gl/constants';
 import {NestedPartial, RGBColor, ColorUI} from '@kepler.gl/types';
+import {SCALE_TYPES} from 'constants/src/default-settings';
 
 type ColorSelectorInputProps = {
   active: boolean;
@@ -43,9 +44,12 @@ type ColorSelectorProps = {
     label?: string;
   }[];
   colorUI?: ColorUI;
+  colorDomain?: number[] | string[];
   inputTheme?: string;
   disabled?: boolean;
   setColorUI?: (newConfig: NestedPartial<ColorUI>) => void;
+  setColorDomain?: (newColorDomain: number[] | string[]) => void;
+  setColorScale?: (newColorScale: keyof typeof SCALE_TYPES) => void;
 };
 
 export const ColorBlock = styled.div<{backgroundcolor: RGBColor}>`
@@ -138,12 +142,10 @@ class ColorSelector extends Component<ColorSelectorProps> {
   };
 
   render() {
-    const {colorSets, disabled, inputTheme, colorUI} = this.props;
-
+    const {colorSets, disabled, inputTheme, colorUI, colorDomain} = this.props;
     const editing = this._getEditing();
     const currentEditing =
       typeof editing === 'number' && colorSets[editing] && typeof colorSets[editing] === 'object';
-
     return (
       <div className="color-selector" ref={this.node}>
         <InputBoxContainer>
@@ -179,6 +181,7 @@ class ColorSelector extends Component<ColorSelectorProps> {
                 onSelectColorRange={this._onSelectColor}
                 setColorPaletteUI={this.props.setColorUI}
                 colorPaletteUI={colorUI as ColorUI}
+                colorDomain={colorDomain}
               />
             ) : (
               <SingleColorPalette
