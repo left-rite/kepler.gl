@@ -157,11 +157,11 @@ const DragHandle = SortableHandle(({className, children}) => (
 type CustomPaletteState = {
   isSorting: boolean;
   // colorThresholds: string[] | number[];
-}
+};
 
 class CustomPalette extends Component<CustomPaletteProps, CustomPaletteState> {
   state: CustomPaletteState = {
-    isSorting: false,
+    isSorting: false
     // colorThresholds: this._init(),
   };
 
@@ -170,7 +170,7 @@ class CustomPalette extends Component<CustomPaletteProps, CustomPaletteState> {
   //   if (!colorDomain) {
   //     return [];
   //   }
-    
+
   //   const length = this.props.customPalette.colors.length;
   //   const min = typeof colorDomain[0] === "string" ? parseInt(colorDomain[0]) : colorDomain[0];
   //   const max = typeof colorDomain[1] === "string" ? parseInt(colorDomain[1]) : colorDomain[1];
@@ -276,55 +276,61 @@ class CustomPalette extends Component<CustomPaletteProps, CustomPaletteState> {
         >
           {colors.map((color, index) => {
             return (
-            <SortableItem key={index} index={index} isSorting={this.state.isSorting}>
-              <DragHandle className="layer__drag-handle">
-                <VertDots height="20px" />
-              </DragHandle>
-              <StyledSwatch color={color} onClick={() => this._onSwatchClick(index)} />
-              <StyledInlineInput>
-                <InlineInput
-                  type="text"
-                  className="custom-palette-hex__input"
-                  value={color.toUpperCase()}
-                  onClick={e => {
-                    e.stopPropagation();
-                  }}
-                  onChange={e => this._inputColorHex(index, e)}
-                  id={`color-hex-input-layer-label-${index}`}
-                />
-              </StyledInlineInput>
-              {isCustomDomain && colorDomain && 
+              <SortableItem key={index} index={index} isSorting={this.state.isSorting}>
+                <DragHandle className="layer__drag-handle">
+                  <VertDots height="20px" />
+                </DragHandle>
+                <StyledSwatch color={color} onClick={() => this._onSwatchClick(index)} />
                 <StyledInlineInput>
                   <InlineInput
                     type="text"
-                    className="custom-palette-hex__lower-threshold"
-                    value={`${((index === 0) ? colorDomain[0] : this.props.colorThresholds[index-1])}`}
-                    id={`color-threshold-lower-${index}`}
-                    disabled
-                  />
-                </StyledInlineInput>
-              }
-              {isCustomDomain && colorDomain &&
-                <StyledInlineInput>
-                  <InlineInput
-                    type="text"
-                    className="custom-palette-hex__upper-threshold"
-                    value={(index === colors.length - 1) ? colorDomain[colorDomain.length-1] : this.props.colorThresholds[index]}
+                    className="custom-palette-hex__input"
+                    value={color.toUpperCase()}
                     onClick={e => {
                       e.stopPropagation();
                     }}
-                    onChange={e => this.props.setColorThresholds(index, e)}
-                    disabled={(index === colors.length - 1)}
-                    id={`color-threshold-input-${index}`}
+                    onChange={e => this._inputColorHex(index, e)}
+                    id={`color-hex-input-layer-label-${index}`}
                   />
                 </StyledInlineInput>
-              }
-              <StyledTrash onClick={() => this._onColorDelete(index)}>
-                <Trash className="trashbin" />
-              </StyledTrash>
-            </SortableItem>
-          )}
-          )}
+                {isCustomDomain && colorDomain && (
+                  <StyledInlineInput>
+                    <InlineInput
+                      type="text"
+                      className="custom-palette-hex__lower-threshold"
+                      value={`${
+                        index === 0 ? colorDomain[0] : this.props.colorThresholds[index - 1]
+                      }`}
+                      id={`color-threshold-lower-${index}`}
+                      disabled
+                    />
+                  </StyledInlineInput>
+                )}
+                {isCustomDomain && colorDomain && (
+                  <StyledInlineInput>
+                    <InlineInput
+                      type="text"
+                      className="custom-palette-hex__upper-threshold"
+                      value={
+                        index === colors.length - 1
+                          ? colorDomain[colorDomain.length - 1]
+                          : this.props.colorThresholds[index]
+                      }
+                      onClick={e => {
+                        e.stopPropagation();
+                      }}
+                      onChange={e => this.props.setColorThresholds(index, e)}
+                      disabled={index === colors.length - 1}
+                      id={`color-threshold-input-${index}`}
+                    />
+                  </StyledInlineInput>
+                )}
+                <StyledTrash onClick={() => this._onColorDelete(index)}>
+                  <Trash className="trashbin" />
+                </StyledTrash>
+              </SortableItem>
+            );
+          })}
         </WrappedSortableContainer>
         {/* Add Step Button */}
         <Button className="add-step__button" link onClick={this._onColorAdd}>

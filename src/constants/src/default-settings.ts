@@ -419,7 +419,7 @@ export const SCALE_FUNC = {
   [SCALE_TYPES.sqrt]: scaleSqrt,
   [SCALE_TYPES.log]: scaleLog,
   [SCALE_TYPES.point]: scalePoint,
-  [SCALE_TYPES.threshold]: scaleThreshold,
+  [SCALE_TYPES.threshold]: scaleThreshold
 };
 
 export const ALL_FIELD_TYPES = keyMirror({

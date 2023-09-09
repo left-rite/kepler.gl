@@ -58,6 +58,8 @@ type ColorPaletteGroupProps = {
   onSelect: (p: ColorRange, e: MouseEvent) => void;
 };
 
+const RADIX: number = 10;
+
 export const ALL_TYPES: string[] = uniq(
   COLOR_RANGES.map(c => c.type)
     .filter(ctype => ctype)
@@ -113,32 +115,34 @@ const CONFIG_SETTINGS = {
 };
 
 export default class ColorRangeSelector extends Component<ColorRangeSelectorProps> {
-
   state = {
-    isCustomDomain: this.props.colorPaletteUI.customPalette.colorMap ? true : false,
-    colorThresholds: this.props.colorPaletteUI.customPalette.colorMap ? this._fromColorMap() : this._init(),
+    isCustomDomain: Boolean(this.props.colorPaletteUI.customPalette.colorMap),
+    colorThresholds: this.props.colorPaletteUI.customPalette.colorMap
+      ? this._fromColorMap()
+      : this._init()
   };
 
   _fromColorMap() {
     const {colorMap} = this.props.colorPaletteUI.customPalette;
-    const getEditableThreshold = (k) => (k && k.length > 0 && typeof k[0] === 'string') 
-      ? k[0].split(' to ').pop()
-      : null;
+    const getEditableThreshold = k =>
+      k && k.length > 0 && typeof k[0] === 'string' ? k[0].split(' to ').pop() : null;
     const thresholds = colorMap.map(getEditableThreshold);
     thresholds.pop(); // The last one is not editable as it is the maxima
     return thresholds;
   }
-  
+
   _init() {
     const {colorDomain} = this.props;
 
     if (!colorDomain) {
       return [];
     }
-    
+
     const length = this.props.colorPaletteUI.colorRangeConfig.steps;
-    const min = typeof colorDomain[0] === "string" ? parseInt(colorDomain[0]) : colorDomain[0];
-    const max = typeof colorDomain[1] === "string" ? parseInt(colorDomain[1]) : colorDomain[1];
+    const min =
+      typeof colorDomain[0] === 'string' ? parseInt(colorDomain[0], RADIX) : colorDomain[0];
+    const max =
+      typeof colorDomain[1] === 'string' ? parseInt(colorDomain[1], RADIX) : colorDomain[1];
 
     const getDecimalPlaces = (num: number) => {
       if (Number.isInteger(num)) {
@@ -150,11 +154,13 @@ export default class ColorRangeSelector extends Component<ColorRangeSelectorProp
     const decimals = Math.max(getDecimalPlaces(min), getDecimalPlaces(max));
 
     const roundDown = (num: number) => {
-      return decimals ? parseFloat(num.toFixed(decimals)) : parseInt(num.toFixed());
-    }
+      return decimals ? parseFloat(num.toFixed(decimals)) : parseInt(num.toFixed(), RADIX);
+    };
 
     const increment = roundDown((max - min) / length);
-    return new Array(length).fill(undefined).map((v, i) => (i === length - 1) ? max : roundDown(min + increment * (i + 1))) as number[];
+    return new Array(length)
+      .fill(undefined)
+      .map((v, i) => (i === length - 1 ? max : roundDown(min + increment * (i + 1)))) as number[];
   }
 
   static defaultProps = {
@@ -221,17 +227,17 @@ export default class ColorRangeSelector extends Component<ColorRangeSelectorProp
       colorThresholds[index] = value;
       this.setState({colorThresholds});
 
-      const {colorPaletteUI}= {...this.props}
+      const {colorPaletteUI} = {...this.props};
       const {colors} = colorPaletteUI.customPalette;
       const minima = this.props.colorDomain[0];
       const maxima = this.props.colorDomain[this.props.colorDomain.length - 1];
-      const isFirst = (i) => i === 0;
+      const isFirst = i => i === 0;
       const isLast = (i, obj) => i === obj.length - 1;
 
       const colorMap = colors.map((c, i, self) => {
-        const minOfRange = isFirst(i) ? minima : colorThresholds[i-1];
+        const minOfRange = isFirst(i) ? minima : colorThresholds[i - 1];
         const maxOfRange = isLast(i, self) ? maxima : colorThresholds[i];
-        return [`${minOfRange} to ${maxOfRange}` , c];
+        return [`${minOfRange} to ${maxOfRange}`, c];
       });
 
       colorPaletteUI.customPalette.colorMap = colorMap;
@@ -258,12 +264,12 @@ export default class ColorRangeSelector extends Component<ColorRangeSelectorProp
             />
           ))}
           {colorRangeConfig.custom && (
-            <StyledPaletteConfig className="color-palette__config" onClick={e => e.stopPropagation()}>
+            <StyledPaletteConfig
+              className="color-palette__config"
+              onClick={e => e.stopPropagation()}
+            >
               <PanelLabel>
-                <FormattedMessage 
-                  id="custom-color-domain-label" 
-                  defaultMessage="Custom Domain"
-                />
+                <FormattedMessage id="custom-color-domain-label" defaultMessage="Custom Domain" />
               </PanelLabel>
               <Switch
                 id="custom-color-domain-switch"

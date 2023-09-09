@@ -47,7 +47,7 @@ import {Layer, LayerBaseConfig, VisualChannel, AggregationLayer} from '@kepler.g
 import {NestedPartial, RGBColor, LayerVisConfig, ColorUI, Field} from '@kepler.gl/types';
 import {toggleModal, ActionHandler} from '@kepler.gl/actions';
 import {Datasets} from '@kepler.gl/table';
-import { LayerColorConfig } from 'layers/src/base-layer';
+import {LayerColorConfig} from 'layers/src/base-layer';
 
 type LayerConfiguratorProps = {
   layer: Layer;
@@ -97,7 +97,7 @@ type LayerColorRangeSelectorProps = {
 
 class ColorLayer extends Layer {
   config!: LayerBaseConfig & LayerColorConfig;
-};
+}
 
 type ChannelByValueSelectorProps = {
   layer: Layer;

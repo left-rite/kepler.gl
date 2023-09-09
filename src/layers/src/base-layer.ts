@@ -906,15 +906,17 @@ class Layer {
 
       const regex = /^\-?[0-9\.]+ to \-?[0-9\.]+$/;
       const isCustomScale = c => typeof c[0] === 'string' && regex.test(c[0]);
-      return colorMap.every(isCustomScale) ? this.getCustomColorScale(colorMap) : this.getOrdinalColorScale(colorMap);
+      return colorMap.every(isCustomScale)
+        ? this.getCustomColorScale(colorMap)
+        : this.getOrdinalColorScale(colorMap);
     }
     return this.getVisChannelScale(colorScale, colorDomain, colorRange.colors.map(hexToRgb));
   }
 
   getCustomColorScale(colorMap: ColorMap) {
     const cMap = new Map();
-    const reformatKey = (k) => k.split(' to ')[1];
-   
+    const reformatKey = k => k.split(' to ')[1];
+
     colorMap.forEach(([k, v]) => {
       cMap.set(reformatKey(k), typeof v === 'string' ? hexToRgb(v) : v);
     });
