@@ -133,14 +133,23 @@ export default class ColorRangeSelector extends Component<ColorRangeSelectorProp
     const {colorDomain} = this.props;
 
     if (!colorDomain) {
+      console.error('colorDomain is null or undefined')
+      return [];
+    }
+
+    const filteredColorDomain = colorDomain.filter(c => typeof c === 'number')
+
+    if (filteredColorDomain.length < 2) {
+      console.error('colorDomain does not contain enough values')
       return [];
     }
     
     const length = this.props.colorPaletteUI.colorRangeConfig.steps;
-    const min = typeof colorDomain[0] === "string" ? parseInt(colorDomain[0]) : colorDomain[0];
-    const max = typeof colorDomain[1] === "string" ? parseInt(colorDomain[1]) : colorDomain[1];
+    const min = Math.min(...(filteredColorDomain as number[]));
+    const max = Math.max(...(filteredColorDomain as number[]));
 
     const getDecimalPlaces = (num: number) => {
+
       if (Number.isInteger(num)) {
         return 0;
       }

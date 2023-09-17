@@ -90,6 +90,7 @@ type LayerColorRangeSelectorProps = {
   layer: ColorLayer;
   onChange: (v: Record<string, ColorRange>) => void;
   property?: string;
+  propertyDomain?: string;
   setColorUI: (prop: string, newConfig: NestedPartial<ColorUI>) => void;
 };
 
@@ -231,7 +232,7 @@ export default function LayerConfiguratorFactory(
               collapsible
             >
               {layer.config.strokeColorField ? (
-                <LayerColorRangeSelector {...visConfiguratorProps} property="strokeColorRange" />
+                <LayerColorRangeSelector {...visConfiguratorProps} property="strokeColorRange" propertyDomain="strokeColorDomain"/>
               ) : (
                 <LayerColorSelector
                   {...visConfiguratorProps}
@@ -746,7 +747,7 @@ export default function LayerConfiguratorFactory(
             collapsible
           >
             {layer.config.strokeColorField ? (
-              <LayerColorRangeSelector {...visConfiguratorProps} property="strokeColorRange" />
+              <LayerColorRangeSelector {...visConfiguratorProps} property="strokeColorRange" propertyDomain="strokeColorDomain" />
             ) : (
               <LayerColorSelector
                 {...visConfiguratorProps}
@@ -933,7 +934,7 @@ export default function LayerConfiguratorFactory(
             collapsible
           >
             {layer.config.strokeColorField ? (
-              <LayerColorRangeSelector {...visConfiguratorProps} property="strokeColorRange" />
+              <LayerColorRangeSelector {...visConfiguratorProps} property="strokeColorRange" propertyDomain="strokeColorDomain" />
             ) : (
               <LayerColorSelector
                 {...visConfiguratorProps}
@@ -1120,6 +1121,7 @@ export const LayerColorRangeSelector = ({
   layer,
   onChange,
   property = 'colorRange',
+  propertyDomain = 'colorDomain',
   setColorUI
 }: LayerColorRangeSelectorProps) => (
   <SidePanelSection>
@@ -1133,7 +1135,7 @@ export const LayerColorRangeSelector = ({
       ]}
       colorUI={layer.config.colorUI[property]}
       setColorUI={newConfig => setColorUI(property, newConfig)}
-      colorDomain={layer.config.colorDomain}
+      colorDomain={layer.config[propertyDomain]}
     />
   </SidePanelSection>
 );

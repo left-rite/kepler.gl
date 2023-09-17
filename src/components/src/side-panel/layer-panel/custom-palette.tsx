@@ -156,41 +156,12 @@ const DragHandle = SortableHandle(({className, children}) => (
 
 type CustomPaletteState = {
   isSorting: boolean;
-  // colorThresholds: string[] | number[];
-}
+};
 
 class CustomPalette extends Component<CustomPaletteProps, CustomPaletteState> {
   state: CustomPaletteState = {
-    isSorting: false,
-    // colorThresholds: this._init(),
+    isSorting: false
   };
-
-  // _init() {
-  //   const {colorDomain} = this.props;
-  //   if (!colorDomain) {
-  //     return [];
-  //   }
-    
-  //   const length = this.props.customPalette.colors.length;
-  //   const min = typeof colorDomain[0] === "string" ? parseInt(colorDomain[0]) : colorDomain[0];
-  //   const max = typeof colorDomain[1] === "string" ? parseInt(colorDomain[1]) : colorDomain[1];
-
-  //   const getDecimalPlaces = (num: number) => {
-  //     if (Number.isInteger(num)) {
-  //       return 0;
-  //     }
-  //     return num.toString().split('.')[1].length;
-  //   };
-
-  //   const decimals = Math.max(getDecimalPlaces(min), getDecimalPlaces(max));
-
-  //   const roundDown = (num: number) => {
-  //     return decimals ? parseFloat(num.toFixed(decimals)) : parseInt(num.toFixed());
-  //   }
-
-  //   const increment = roundDown((max - min) / length);
-  //   return new Array(length).fill(undefined).map((v, i) => (i === length - 1) ? max : roundDown(min + increment * (i + 1))) as number[];
-  // }
 
   root = createRef<HTMLDivElement>();
 
