@@ -41,12 +41,11 @@ import HowToButton from './how-to-button';
 import {capitalizeFirstLetter} from '@kepler.gl/utils';
 
 import {CHANNEL_SCALE_SUPPORTED_FIELDS, LAYER_TYPES, ColorRange} from '@kepler.gl/constants';
-import {Layer, LayerBaseConfig, VisualChannel, AggregationLayer} from '@kepler.gl/layers';
+import {Layer, LayerBaseConfig, VisualChannel, AggregationLayer, LayerColorConfig} from '@kepler.gl/layers';
 
 import {NestedPartial, RGBColor, LayerVisConfig, ColorUI, Field} from '@kepler.gl/types';
 import {toggleModal, ActionHandler} from '@kepler.gl/actions';
 import {Datasets} from '@kepler.gl/table';
-import { LayerColorConfig } from 'layers/src/base-layer';
 
 type LayerConfiguratorProps = {
   layer: Layer;

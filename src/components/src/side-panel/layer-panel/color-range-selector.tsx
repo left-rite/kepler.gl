@@ -137,7 +137,7 @@ export default class ColorRangeSelector extends Component<ColorRangeSelectorProp
       return [];
     }
 
-    const filteredColorDomain = colorDomain.filter(c => typeof c === 'number')
+    const filteredColorDomain = (colorDomain as any[]).filter(c => typeof c === 'number')
 
     if (filteredColorDomain.length < 2) {
       console.error('colorDomain does not contain enough values')

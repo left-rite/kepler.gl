@@ -28,7 +28,6 @@ import {StyledPanelDropdown} from '../../common/styled-components';
 import onClickOutside from 'react-onclickoutside';
 import {ColorRange} from '@kepler.gl/constants';
 import {NestedPartial, RGBColor, ColorUI} from '@kepler.gl/types';
-import {SCALE_TYPES} from 'constants/src/default-settings';
 
 type ColorSelectorInputProps = {
   active: boolean;
@@ -48,8 +47,6 @@ type ColorSelectorProps = {
   inputTheme?: string;
   disabled?: boolean;
   setColorUI?: (newConfig: NestedPartial<ColorUI>) => void;
-  setColorDomain?: (newColorDomain: number[] | string[]) => void;
-  setColorScale?: (newColorScale: keyof typeof SCALE_TYPES) => void;
 };
 
 export const ColorBlock = styled.div<{backgroundcolor: RGBColor}>`
