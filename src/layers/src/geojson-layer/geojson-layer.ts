@@ -57,6 +57,7 @@ import {
 } from '@kepler.gl/types';
 import {KeplerTable} from '@kepler.gl/table';
 import {DataContainerInterface} from '@kepler.gl/utils';
+import { PathStyleExtension } from '@deck.gl/extensions';
 
 const SUPPORTED_ANALYZER_TYPES = {
   [DATA_TYPES.GEOMETRY]: true,
@@ -451,7 +452,9 @@ export default class GeoJsonLayer extends Layer {
                 }
               }
             : {})
-        }
+        },
+        getOffset: -0.5,
+        extensions: [new PathStyleExtension({offset: true})],
       }),
       ...(hoveredObject && !visConfig.enable3d
         ? [
