@@ -32,6 +32,8 @@ import {arrayMove} from '@kepler.gl/utils';
 import {ColorRange} from '@kepler.gl/constants';
 import {NestedPartial} from '@kepler.gl/types';
 
+const COLORMAP_VALUE = 1;
+
 type CustomPaletteProps = {
   customPalette: ColorRange;
   isCustomDomain?: boolean;
@@ -164,34 +166,57 @@ class CustomPalette extends Component<CustomPaletteProps, CustomPaletteState> {
   };
 
   root = createRef<HTMLDivElement>();
-
-  _setColorPaletteUI(colors: string[]) {
-    this.props.setCustomPalette({
-      colors
-    });
+  
+  _setColorPaletteUI(colorRange: ColorRange) {
+    this.props.setCustomPalette(colorRange);
   }
 
   _onPickerUpdate = (color: {hex: string}) => {
-    const {colors} = this.props.customPalette;
+    const {colors, colorMap} = this.props.customPalette;
     const newColors = [...colors];
     newColors[this.props.showSketcher as number] = color.hex;
-    this._setColorPaletteUI(newColors);
+    const newColorRange: ColorRange = {colors: newColors};
+
+    if (colorMap) {
+      const newColorMap = structuredClone(colorMap)
+      newColorMap[this.props.showSketcher as number][COLORMAP_VALUE] = color.hex;
+      newColorRange.colorMap = newColorMap;
+    }
+
+    this._setColorPaletteUI(newColorRange);
   };
 
   _onColorDelete = (index: number) => {
-    const {colors} = this.props.customPalette;
+    const {colors, colorMap} = this.props.customPalette;
     const newColors = [...colors];
     if (newColors.length > 1) {
       newColors.splice(index, 1);
     }
-    this._setColorPaletteUI(newColors);
+    const newColorRange: ColorRange = {colors: newColors};
+
+    if (newColors.length > 1 && colorMap) {
+      const newColorMap = structuredClone(colorMap)
+      newColorMap.splice(index, 1);
+      newColorRange.colorMap = newColorMap;
+    }
+
+    this._setColorPaletteUI(newColorRange);
   };
 
   _onColorAdd = () => {
-    const {colors} = this.props.customPalette;
+    const {colors, colorMap} = this.props.customPalette;
     // add the last color
     const newColors = [...colors, colors[colors.length - 1]];
-    this._setColorPaletteUI(newColors);
+
+    const newColorRange: ColorRange = {colors: newColors};
+
+    if (colorMap) {
+      const newColorMap = [...structuredClone(colorMap), structuredClone(colorMap[colors.length - 1])];
+
+      newColorRange.colorMap = newColorMap;
+    }
+
+    this._setColorPaletteUI(newColorRange);
   };
 
   _onSwatchClick = (index: number) => {
@@ -211,9 +236,16 @@ class CustomPalette extends Component<CustomPaletteProps, CustomPaletteState> {
   };
 
   _onSortEnd = ({oldIndex, newIndex}) => {
-    const {colors} = this.props.customPalette;
+    const {colors, colorMap} = this.props.customPalette;
     const newColors = arrayMove(colors, oldIndex, newIndex);
-    this._setColorPaletteUI(newColors);
+    const newColorRange: ColorRange = {colors: newColors};
+
+    if (colorMap) {
+      const newColorMap = arrayMove(colorMap, oldIndex, newIndex);
+      newColorRange.colorMap = newColorMap;
+    }
+
+    this._setColorPaletteUI(newColorRange);
     this.setState({isSorting: false});
   };
 
@@ -222,10 +254,19 @@ class CustomPalette extends Component<CustomPaletteProps, CustomPaletteState> {
   };
 
   _inputColorHex = (index: number, {target: {value}}) => {
-    const {colors} = this.props.customPalette;
+    const {colors, colorMap} = this.props.customPalette;
     const newColors = [...colors];
     newColors[index] = value.toUpperCase();
-    this._setColorPaletteUI(newColors);
+    
+    const newColorRange: ColorRange = {colors: newColors};
+
+    if (colorMap) {
+      const newColorMap = structuredClone(colorMap)
+      newColorMap[index][COLORMAP_VALUE] = value.toUpperCase();
+      newColorRange.colorMap = newColorMap;
+    }
+
+    this._setColorPaletteUI(newColorRange);
   };
 
   render() {
